@@ -1,0 +1,9 @@
+{
+  "name": "smarty-snek",
+  "version": "0.0.0",
+  "description": "SmartySnek",
+  "main": "app.js",
+  "author": {
+    "name": ""
+  }
+}

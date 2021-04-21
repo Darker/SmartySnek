@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1000
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "SmartySnek", "SmartySnek\SmartySnek.njsproj", "{BF4F6986-5D29-4F95-9C2C-93BC6CD1CBFF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF4F6986-5D29-4F95-9C2C-93BC6CD1CBFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF4F6986-5D29-4F95-9C2C-93BC6CD1CBFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF4F6986-5D29-4F95-9C2C-93BC6CD1CBFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF4F6986-5D29-4F95-9C2C-93BC6CD1CBFF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4A80B46D-FF2A-4EFE-8E5F-BB0AE0DF5ADB}
+	EndGlobalSection
+EndGlobal
