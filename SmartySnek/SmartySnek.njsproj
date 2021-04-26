@@ -29,6 +29,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
+    <Compile Include="server\main.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="web\js\game\bots\GameStateInfo.js">
       <SubType>Code</SubType>
     </Compile>
@@ -90,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="js\" />
+    <Folder Include="server\" />
     <Folder Include="web\" />
     <Folder Include="web\css\" />
     <Folder Include="web\img\" />
