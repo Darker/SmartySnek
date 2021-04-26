@@ -1,0 +1,29 @@
+﻿
+
+td {
+    width: 40px;
+    height: 40px;
+
+    background-size:cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+
+}
+
+.speed_control_label {
+    display: inline-block;
+    width: 15em;
+    min-width: 10em;
+}
+
+.floating-tooltip {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    display: none;
+    border: 1px dotted black;
+    background-color: rgba(0, 146, 255, 0.5);
+
+    font-family: monospace;
+    white-space: pre;
+}

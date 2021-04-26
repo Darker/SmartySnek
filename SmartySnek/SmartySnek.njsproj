@@ -29,8 +29,80 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
+    <Compile Include="web\js\game\bots\GameStateInfo.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\bots\impls\AStarBot.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\bots\impls\FoodSeeker.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\bots\impls\KeyboardController.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\bots\impls\LucaBot.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\bots\impls\SweepBot.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\bots\impls\TurnRightBot.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\debug\FieldDebug.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\EmptyMapFieldContents.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\Food.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\Game.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\GameMap.js" />
+    <Compile Include="web\js\game\generic\ColorRGBA.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\MapField.js" />
+    <Compile Include="web\js\game\MapFieldContents.js" />
+    <Compile Include="web\js\game\math\Orientation.js" />
+    <Compile Include="web\js\game\math\Vector2.js" />
+    <Compile Include="web\js\game\Snake.js" />
+    <Compile Include="web\js\game\bots\SnakeController.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\game\SnakeSegment.js" />
+    <Compile Include="web\js\JavaScript1.js" />
+    <Compile Include="web\js\main.js" />
+    <Compile Include="web\js\render\GameControls.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\render\HTMLGameMap.js" />
+    <Compile Include="web\js\util\UniqueID.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <Content Include="web\css\main.css" />
+    <Content Include="web\img\sneks.svg" />
+    <Content Include="web\index.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="js\" />
+    <Folder Include="web\" />
+    <Folder Include="web\css\" />
+    <Folder Include="web\img\" />
+    <Folder Include="web\img\sneks\" />
+    <Folder Include="web\js\" />
+    <Folder Include="web\js\game\" />
+    <Folder Include="web\js\game\bots\impls\" />
+    <Folder Include="web\js\game\math\" />
+    <Folder Include="web\js\game\bots\" />
+    <Folder Include="web\js\game\debug\" />
+    <Folder Include="web\js\game\generic\" />
+    <Folder Include="web\js\render\" />
+    <Folder Include="web\js\util\" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
