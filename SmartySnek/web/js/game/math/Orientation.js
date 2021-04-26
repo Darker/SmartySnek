@@ -46,6 +46,19 @@ class Orientation {
         return DIRECTION_NAMES[this.direction];
     }
 
+    /**
+     * 
+     * @param {Orientation} otherDirection
+     */
+    equals(otherDirection) {
+        if (typeof otherDirection == "number") {
+            return this.direction == otherDirection;
+        }
+        else {
+            return this.direction == otherDirection.direction;
+        }
+    }
+
     rotateLeft() {
         ++this.direction;
         this.normalize();

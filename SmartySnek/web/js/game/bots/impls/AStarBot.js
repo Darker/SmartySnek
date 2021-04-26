@@ -1,10 +1,74 @@
 ﻿import SnakeController from "../SnakeController.js";
 import FieldDebug from "../../debug/FieldDebug.js";
+import Vector2 from "../../math/Vector2.js";
+import Orientation from "../../math/Orientation.js";
 
 /**
  * @typedef {import("../GameStateInfo").default} GameStateInfo
  * */
 
+class AStarPathStep {
+    /**
+     * 
+     * @param {Vector2} point
+     * @param {Vector2} prevPoint
+     */
+    constructor(point, prevPoint) {
+        this.point = point;
+        this.direction = Orientation.fromVectors(prevPoint, point);
+    }
+    /**
+     * Returns true, if snake can get from my point to given point
+     * @param {Vector2} point
+     */
+    isSafelyAdjacent(point) {
+        // only directly adjacent (non diagonal) fields are accepted
+        if (this.point.isDirectlyAdjacent(point)) {
+            const dirTo = Orientation.fromVectors(this.point, point);
+            // If the reverse of the direction to new point is
+            // the direction of current point, then it points back and is not safe
+            dirTo.turnAround();
+            if (!dirTo.equals(this.direction)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+class AStarPath {
+    constructor() {
+        /** @type {AStarPathStep[]} **/
+        this.steps = [];
+    }
+    /**
+     * 
+     * @param {AStarPathStep} step
+     */
+    addStep(step) {
+        this.steps.push(step);
+    }
+    get last() {
+        if (this.steps.length > 0) {
+            return this.steps[this.steps.length - 1];
+        }
+        else {
+            return null;
+        }
+    }
+    fork() {
+        const newPath = new AStarPath();
+        newPath.steps.push(...this.steps);
+        return newPath;
+    }
+    /**
+     * Returns true if snake 
+     * @param {Vector2} point
+     */
+    isSafelyAdjacent(point) {
+        return this.last.isSafelyAdjacent(point);
+    }
+}
 
 class AStarBot extends SnakeController {
     constructor() {
@@ -22,82 +86,10 @@ class AStarBot extends SnakeController {
      * @param {GameStateInfo} gameInfo
      */
     play(gameInfo) {
-        // find closest food
-        const foodField = gameInfo.closestFood();
-        let directionToGo = "";
-        // if food exists on map
-        if (foodField) {
-            // if food is above snake and snake is not going up
-            if (foodField.y < gameInfo.snakePosition.y && gameInfo.snakeDirectionName != "UP") {
-                // if snake is going right now, turning left will orient it up
-                if (gameInfo.snakeDirectionName == "RIGHT") {
-                    directionToGo = "LEFT";
-                }
-                // any other case just turn right
-                else {
-                    directionToGo = "RIGHT";
-                }
-            }
-            // food is on the right in the map
-            else if (foodField.x > gameInfo.snakePosition.x && gameInfo.snakeDirectionName != "RIGHT") {
-                if (gameInfo.snakeDirectionName == "DOWN") {
-                    directionToGo = "LEFT";
-                }
-                else {
-                    directionToGo = "RIGHT";
-                }
-            }
-            // food is on the left
-            else if (foodField.x < gameInfo.snakePosition.x && gameInfo.snakeDirectionName != "LEFT") {
-                if (gameInfo.snakeDirectionName == "UP") {
-                    directionToGo = "LEFT";
-                }
-                else {
-                    directionToGo = "RIGHT";
-                }
-            }
-            // if food is below snake and snake is not going down
-            else if (foodField.y > gameInfo.snakePosition.y && gameInfo.snakeDirectionName != "DOWN") {
-                // if snake is going right now, turning left will orient it up
-                if (gameInfo.snakeDirectionName == "LEFT") {
-                    directionToGo = "LEFT";
-                }
-                // any other case just turn right
-                else {
-                    directionToGo = "RIGHT";
-                }
-            }
-        }
 
-        // Avoiding danger
-        if (gameInfo.itemInFrontOfSnake.isDangerous) {
-            // danger in front, what about left?
-            if (gameInfo.itemLeftOfSnake.isDangerous) {
-                // left dangerous, only chance is to go right
-                directionToGo = "RIGHT";
-            }
-            else {
-                // left was not dangerous, go left
-                directionToGo = "LEFT";
-            }
-        }
+        const paths = [];
+        // put possible fields snake can go through as start paths
 
-        if (directionToGo == "RIGHT") {
-            if (!gameInfo.itemRightOfSnake.isDangerous) {
-                gameInfo.goRight();
-            }
-            else {
-                gameInfo.fieldRightOfSnake.addDebug(new FieldDebug("Danger!", [255, 0, 0, 255], null, 12));
-            }
-        }
-        if (directionToGo == "LEFT") {
-            if (!gameInfo.itemLeftOfSnake.isDangerous) {
-                gameInfo.goLeft();
-            }
-            else {
-                gameInfo.fieldRightOfSnake.addDebug(new FieldDebug("Danger!", [255, 0, 0, 255], null, 12));
-            }
-        }
     }
 }
 

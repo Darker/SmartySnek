@@ -3,6 +3,19 @@
  * @typedef {import("./Orientation").default} Orientation
  * */
 
+
+/**
+ * Offsets for a point orientation, where the directions go as described in Orientation.js
+ * 
+ * */
+const ORIENTATION_OFFSETS = [
+    [-1, 0],
+    [0, -1],
+    [1, 0],
+    [0, 1]
+];
+
+
 class Vector2 {
     /**
      * 
@@ -126,6 +139,23 @@ class Vector2 {
         yield new Vector2(this.x, this.y + 1);
         yield new Vector2(this.x + 1, this.y);
         yield new Vector2(this.x, this.y - 1);
+    }
+
+    equals(x, y) {
+        if (x instanceof Vector2) {
+            y = x.y;
+            x = x.x;
+        }
+        return this.x == x && this.y == y;
+    }
+
+    /**
+     * Returns point next to this one at given orientation
+     * @param {Orientation} orientation
+     */
+    pointAt(orientation) {
+        const offsets = ORIENTATION_OFFSETS[orientation.direction];
+        return new Vector2(offsets[0] + this.x, offsets[1] + this.y);
     }
 
     /**
