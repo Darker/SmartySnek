@@ -19,6 +19,10 @@ class MapFieldContents {
     get damage() { return 0; }
     get isSnakeSegment() { return false; }
     get isEmpty() { return false; }
+    /**
+     * Called when this object is removed from game map.
+     * */
+    removedFromMap() {}
 
     /** @type {MapFieldType[]} **/
     static TYPE = [

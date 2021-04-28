@@ -16,6 +16,11 @@ td {
     min-width: 10em;
 }
 
+.game-table {
+    background-image: url(../img/backgrounds/pretty_grass_modified.png);
+    background-size: 40% 40%;
+}
+
 .floating-tooltip {
     position: absolute;
     top: 0px;

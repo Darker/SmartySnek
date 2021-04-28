@@ -56,6 +56,10 @@ class GameStateInfo {
         return this.snake.head.position;
     }
 
+    get snakeDirection() {
+        return this.snake.orientation;
+    }
+
     get itemInFrontOfSnake() {
         return nullToEmpty(this.snake.getCollisionObject());
     }

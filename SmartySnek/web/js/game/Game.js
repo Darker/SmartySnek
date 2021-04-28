@@ -5,7 +5,7 @@ import GameStateInfo from "./bots/GameStateInfo.js";
 
 class Game {
     constructor() {
-        this.map = new GameMap(16);
+        this.map = new GameMap(10);
         this.snake = new Snake(this.map);
         this.controller = null;
 
@@ -25,7 +25,15 @@ class Game {
             }
         }
     }
-
+    reset() {
+        this.snake.unusedFood = 0;
+        this.snake.dead = false;
+        this.snake.resetSnake();
+        if(this.controller)
+            this.controller.reset();
+        this.map.clear();
+        this.snake.placeSnake();
+    }
     // game step
     step() {
         const collision = this.snake.getCollisionObject();

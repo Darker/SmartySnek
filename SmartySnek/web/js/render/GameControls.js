@@ -32,6 +32,10 @@ class GameControls {
 
         this.html.append(this.botSelector, botSelectorSpan);
 
+        if (localStorage["GameControls.speedMilliseconds"]) {
+            this.speedMilliseconds = localStorage["GameControls.speedMilliseconds"] * 1;
+        }
+
         this.updateSpeed();
     }
     get speedMilliseconds() {
@@ -57,32 +61,52 @@ class GameControls {
             opt.appendChild(new Text(ctr.name));
             this.botSelector.appendChild(opt);
         }
+
+        if (localStorage["GameControls.selectedBot"]) {
+            this.selectedBot = localStorage["GameControls.selectedBot"];
+        }
     }
 
     get selectedBot() {
         return this._botOptions[([...this.botSelector.options].filter(x => x.selected)[0].value * 1)];
     }
     set selectedBot(bot) {
-        const index = this._botOptions.indexOf(bot);
-        if (index >= 0) {
-            for (const option of [...this.botSelector.options]) {
-                option.selected = option.value == (index + "");
+        if (typeof bot == "string") {
+            const name = bot;
+            bot = this._botOptions.find((x) => x.constructor.name == name);
+            if (!bot)
+                throw new Error("Bot '" + name + "' not found!");
+            else {
+                console.log("Setting bot to ", bot);
             }
-            //this.updateBot();
         }
-        else {
-            throw new Error("Cannot find bot to select.");
+
+        if (bot) {
+            const index = this._botOptions.indexOf(bot);
+            if (index >= 0) {
+                for (const option of [...this.botSelector.options]) {
+                    const selected = option.value == (index + "");
+                    option.selected = selected;
+                    option.setAttribute("data-is-selected", selected+"")
+                }
+                //this.updateBot();
+            }
+            else {
+                throw new Error("Cannot find bot to select.");
+            }
         }
     }
 
 
     updateBot() {
         this.botSelectorLabel.data = this.selectedBot.description;
+        localStorage["GameControls.selectedBot"] = this.selectedBot.constructor.name;
         if (typeof this.onBotChange == "function") {
             this.onBotChange();
         }
     }
     updateSpeed() {
+        localStorage["GameControls.speedMilliseconds"] = this.speedMilliseconds;
         if (this.speedStopped) {
             this.speedControlLabel.data = "PAUSED";
         }

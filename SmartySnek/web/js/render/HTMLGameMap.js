@@ -18,6 +18,7 @@
 class HTMLGameMap {
     constructor() {
         this.html = document.createElement("table");
+        this.html.classList.add("game-table");
         this.html.setAttribute("cellpadding", "0");
         this.html.setAttribute("cellspacing", "0");
         //this.html.setAttribute("cell")
@@ -39,6 +40,7 @@ class HTMLGameMap {
         });
 
         this.html.addEventListener("mousemove", (e) => this.mousemove(e));
+        this.html.addEventListener("mouseout", (e) => this.floatingTooltip.style.display = "");
 
         this.html.appendChild(this.body);
 
@@ -193,9 +195,27 @@ class HTMLGameMap {
             console.log("SEGMENT:   Orientation: " + segment.orientation);
             this.calculateSegmentTransformation(segment);
         }
-        else if (field.isEmpty) {
-            field.contents = new Food();
+        // debig adjacency
+        //field.addDebug("CLICKED", [0, 0, 0], null, 10);
+        //for (const pos of field.position.adjacentFields()) {
+        //    const posField = this.map.getField(pos);
+        //    const adjacent = posField.position.isDirectlyAdjacent(field.position, null, this.map.size);
+        //    posField.addDebug(adjacent ? "ADJACENT" : "NOPE", adjacent ? [0, 255, 0] : [255, 0, 0]);
+        //}
+        if (!this._first) {
+            this._first = field;
         }
+        else {
+            const adjacent = this._first.position.isDirectlyAdjacent(field.position, null, this.map.size);
+            this._first.addDebug(adjacent ? "ADJACENT" : "NOPE", adjacent ? [0, 255, 0] : [255, 0, 0]);
+            field.addDebug(adjacent ? "ADJACENT" : "NOPE", adjacent ? [0, 255, 0] : [255, 0, 0]);
+            this._first = null;
+        }
+
+
+        //else if (field.isEmpty) {
+        //    field.contents = new Food();
+        //}
     }
 
     getField(x, y) {
@@ -220,7 +240,7 @@ class HTMLGameMap {
             this.doTooltip(field.cellIndex, field.parentNode.rowIndex);
         }
         else {
-            //this.floatingTooltip.style.display = "";
+            this.floatingTooltip.style.display = "";
         }
     }
 
@@ -245,6 +265,9 @@ class HTMLGameMap {
         }
         if (mapField.foodPoints > 0) {
             data += "\nFood: " + mapField.foodPoints;
+        }
+        if (mapField.isSnakeSegment) {
+            data += "\nIndex: (" + mapField.contents.index + " / " + mapField.contents.reverseIndex + ")";
         }
         for (const debug of mapField.debugContents) {
             if (debug.title) {

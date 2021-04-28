@@ -9,7 +9,7 @@ class KeyboardController extends SnakeController {
     constructor() {
         super();
         this.direction = 0;
-        if (window) {
+        if (typeof window == "object") {
             window.addEventListener("keydown", (event) => {
                 if (event.keyCode == 37) {
                     this.direction = 1;

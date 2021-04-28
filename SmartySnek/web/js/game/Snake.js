@@ -12,7 +12,9 @@ class Snake {
      */
     constructor(map) {
         this.map = map;
-        this.segments = [new SnakeSegment(this, 0), new SnakeSegment(this, 1), new SnakeSegment(this, 2)];
+        this.segments = [];
+
+
         // number of "food points" for the snake to grow from
         this.unusedFood = 0;
 
@@ -25,7 +27,17 @@ class Snake {
          * */
 
         this.orientation = new Orientation();
+        this.resetSnake();
     }
+    resetSnake() {
+        this.segments.length = 0;
+        for (let i = 0; i < 7; ++i) {
+            this.segments.push(new SnakeSegment(this, i));
+        }
+        this.dead = false;
+        this.unusedFood = 0;
+    }
+
     placeSnake() {
         //this.head.position.position = this.map.randomLocation();
         //this.orientation.direction = Math.floor(Math.random() * 4);

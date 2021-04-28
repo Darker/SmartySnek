@@ -34,7 +34,9 @@ class FieldDebug {
     }
 
     get htmlBackgroundColor() {
-        return `rgba(${this.backgroundColor.r}, ${this.backgroundColor.g}, ${this.backgroundColor.b}, ${(this._stepsToLive+1)/this.startStepsToLive})`;
+        const color = `rgba(${this.backgroundColor.r}, ${this.backgroundColor.g}, ${this.backgroundColor.b}, ${(this._stepsToLive + 1) / this.startStepsToLive})`;
+        //console.log("HTML COLOR: ", color, this.backgroundColor);
+        return color;
     }
     get htmlOutlineColor() {
         return `rgba(${this.outlineColor.r}, ${this.outlineColor.g}, ${this.outlineColor.b}, ${(this._stepsToLive + 1) / this.startStepsToLive})`;

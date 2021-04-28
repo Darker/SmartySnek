@@ -23,6 +23,7 @@ class SnakeSegment extends MapFieldContents {
         this.id = "segment" + SEGMENT_ID.getID();
         this.position = new Vector2(0,0);
     }
+
     get next() {
         return this.isLast ? null : this.snake.segments[this.index + 1];
     }
@@ -45,6 +46,10 @@ class SnakeSegment extends MapFieldContents {
             }
         }
     }
+    get reverseIndex() {
+        return this.snake.segments.length - 1 - this.index;
+    }
+
     get uniqueID() {
         return this.id;
     }

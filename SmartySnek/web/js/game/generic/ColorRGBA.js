@@ -59,7 +59,7 @@
         return this.bands[2] = b;
     }
     set a(a) {
-        return this.bands[2] = a;
+        return this.bands[3] = a;
     }
     /**
      * Blend semi transparent colors into solid one with black background

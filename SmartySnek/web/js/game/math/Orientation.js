@@ -1,9 +1,11 @@
-﻿
+﻿import GameMath from "./GameMath.js";
+
 /**
  * @typedef {import("./Vector2").default} Vector2
  * */
 
 const DIRECTION_NAMES = ["LEFT", "DOWN", "RIGHT", "UP"];
+const DIRECTION_PICTOGRAMS = ["[<-]", "[V]", "[^]", "[->]"];
 
 class Orientation {
     constructor(dir = 0) {
@@ -13,6 +15,7 @@ class Orientation {
         *        3
         *     0     2
         *        1     ...[inf, inf]
+        *  @type {number}
         * */
         this.direction = dir;
     }
@@ -20,18 +23,45 @@ class Orientation {
      * Returns orientation if it can be drawn between the two vectors. The orientation draws from vec1 to vec2
      * @param {Vector2} vec1
      * @param {Vector2} vec2
+     * @param {number} overflowSize if set, an overflow will be applied and the shortest vector will be chosen
      */
-    static fromVectors(vec1, vec2) {
-        if (vec1.equals(vec2)) {
-            return null;
+    static fromVectors(vec1, vec2, overflowSize = NaN) {
+        let direction = this.directionFromVectors(vec1, vec2, overflowSize);
+        return direction >= 0 ? new Orientation(direction) : null;
+    }
+
+    /**
+     * Returns orientation if it can be drawn between the two vectors. The orientation draws from vec1 to vec2
+     * @param {Vector2} vec1
+     * @param {Vector2} vec2
+     * @param {number} overflowSize if set, an overflow will be applied and the shortest vector will be chosen
+     */
+    static directionFromVectors(vec1, vec2, overflowSize = NaN) {
+        let direction = -1;
+        if (!vec1.equals(vec2)) {
+            const overflowUsed = !Number.isNaN(overflowSize);
+
+            let vec1x = GameMath.normalizeCoordOverflow(vec1.x, overflowSize);
+            let vec1y = GameMath.normalizeCoordOverflow(vec1.y, overflowSize);
+            let vec2x = GameMath.normalizeCoordOverflow(vec2.x, overflowSize);
+            let vec2y = GameMath.normalizeCoordOverflow(vec2.y, overflowSize);
+            
+            if (vec1x == vec2x) {
+                direction = vec1y > vec2y ? 3 : 1;
+                if (overflowUsed && Math.abs(vec1y-vec2y)>overflowSize/2) {
+                    // reverse direction if the shortest path is through the overflow
+                    direction = direction == 3 ? 1 : 3;
+                }
+            }
+            else if (vec1y == vec2y) {
+                direction = vec1x > vec2x ? 0 : 2;
+                if (overflowUsed && Math.abs(vec1x - vec2x) > overflowSize / 2) {
+                    // reverse direction if the shortest path is through the overflow
+                    direction = direction == 0 ? 2 : 0;
+                }
+            }
         }
-        else if (vec1.x == vec2.x) {
-            return new Orientation(vec1.y > vec2.y ? 3 : 1);
-        }
-        else if (vec1.y == vec2.y) {
-            return new Orientation(vec1.x > vec2.x ? 0 : 2);
-        }
-        return null;
+        return direction;
     }
 
     clone() {
@@ -41,11 +71,35 @@ class Orientation {
     toString() {
         return "Orientation(" + this.direction + " = " + this.directionName(); + ")";
     }
+    /**
+     * Creates new orientation that will turn from this orientation to the target orientation
+     * @param {Orientation} otherDir
+     */
+    dirToDir(otherDir) {
+        if (otherDir.direction == this.directionToLeft) {
+            return new Orientation(1);
+        }
+        else if (otherDir.direction == this.directionToRight) {
+            return new Orientation(3);
+        }
+        else {
+            return new Orientation(2);
+        }
+    }
+
+    get directionToLeft() {
+        return this.direction < 3 ? this.direction + 1 : 0;
+    }
+    get directionToRight() {
+        return this.direction > 0 ? this.direction - 1 : 3;
+    }
 
     directionName() {
         return DIRECTION_NAMES[this.direction];
     }
-
+    directionPictogram() {
+        return DIRECTION_PICTOGRAMS[this.direction];
+    }
     /**
      * 
      * @param {Orientation} otherDirection

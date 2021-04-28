@@ -1,4 +1,5 @@
-﻿
+﻿import GameMath from "./GameMath.js";
+
 /**
  * @typedef {import("./Orientation").default} Orientation
  * */
@@ -62,13 +63,7 @@ class Vector2 {
             throw new TypeError("Cannot convert to Vector2");
         }
     }
-    /**
-     * 
-     * @param {Vector2} vector
-     */
-    equals(vector) {
-        return vector.x == this.x && vector.y == this.y;
-    }
+
     //// rotate by orientation relative to default around [0,0]
     //rotate(orientation) {
 
@@ -109,13 +104,35 @@ class Vector2 {
      * Returns if sides of the two points touch
      * @param {number|Vector2} x
      * @param {number} y
+     * @param {number} overflow
      */
-    isDirectlyAdjacent(x, y) {
+    isDirectlyAdjacent(x, y, overflow = NaN) {
         if (x instanceof Vector2) {
             y = x.y;
             x = x.x;
         }
-        return (y == this.y && Math.abs(this.x - x) == 1) || (x == this.x && Math.abs(this.y - y) == 1);
+        let adjacent = (y == this.y && Math.abs(this.x - x) == 1) || (x == this.x && Math.abs(this.y - y) == 1);
+        if (!Number.isNaN(overflow) && !adjacent) {
+            // move everything by half of map width and normalize
+            const halfOverflow = Math.floor(overflow / 2);
+            x += halfOverflow;
+            y += halfOverflow;
+            // convert my coordinates too
+            let myX = this.x + halfOverflow;
+            let myY = this.y + halfOverflow;
+
+
+            
+            x = GameMath.normalizeCoordOverflow(x, overflow);
+            y = GameMath.normalizeCoordOverflow(y, overflow);
+            myX = GameMath.normalizeCoordOverflow(myX, overflow);
+            myY = GameMath.normalizeCoordOverflow(myY, overflow);
+
+            console.log("Validating shifted adjacency: " + new Vector2(x, y) + " to " + new Vector2(myX, myY));
+
+            return (y == myY && Math.abs(myX - x) == 1) || (x == myX && Math.abs(myY - y) == 1);
+        }
+        return adjacent;
     }
 
     clone() {
@@ -140,7 +157,11 @@ class Vector2 {
         yield new Vector2(this.x + 1, this.y);
         yield new Vector2(this.x, this.y - 1);
     }
-
+    /**
+     * 
+     * @param {number|Vector2} x
+     * @param {number} y
+     */
     equals(x, y) {
         if (x instanceof Vector2) {
             y = x.y;
@@ -168,6 +189,12 @@ class Vector2 {
         }
         const pos = spiral(spiralSteps);
         return new Vector2(this.x + pos[0], this.y + pos[1]);
+    }
+
+    *spiralNeigbors(max=500) {
+        for (let step = 0; step < max; ++step) {
+            yield this.spiralNeighbor(step);
+        }
     }
 
     toString() {

@@ -17,13 +17,18 @@ class GameMap {
     }
     getField(x, y) {
         const position = this.normalizePoint(x, y);
-        return this.map[position.y * this.size + position.x];
+        const offset = position.y * this.size + position.x;
+        const result = this.map[offset];
+        if (!result) {
+            throw new Error("Failed to retrieve point at " + new Vector2(x,y)+" -> " + position + " at this.map[" + offset + "]");
+        }
+        return result;
     }
 
     /**
      * Normalizes overflow of a point so that it is within the map
-     * @param {any} x
-     * @param {any} y
+     * @param {number|Vector2} x
+     * @param {number} y
      * @returns {Vector2}
      */
     normalizePoint(x, y) {
@@ -34,18 +39,32 @@ class GameMap {
 
         // auto overflow
         if (x >= this.size) {
-            x = x - this.size;
+            x = (x % this.size);
         }
-        if (x < 0) {
-            x = this.size + x;
+        else if (x < 0) {
+            while (x < 0) {
+                x += this.size;
+            }
         }
         if (y >= this.size) {
-            y = y - this.size;
+            y = (y % this.size);
         }
-        if (y < 0) {
-            y = this.size + y;
+        else if (y < 0) {
+            while (y < 0) {
+                y += this.size;
+            }
         }
         return new Vector2(x, y);
+    }
+
+    /**
+     * Clears everything from game map
+     * */
+    clear() {
+        for (const field of this.map) {
+            field.contents = null;
+            field.debugContents.length = 0;
+        }
     }
 
     randomLocation() {
@@ -80,6 +99,12 @@ class GameMap {
             }
         }
         return count;
+    }
+
+    clearAllDebug() {
+        for (const field of this.map) {
+            field.debugContents.length = 0;
+        }
     }
 
     /**
