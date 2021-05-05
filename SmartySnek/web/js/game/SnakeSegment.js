@@ -2,6 +2,7 @@
 import Vector2 from "./math/Vector2.js";
 import Orientation from "./math/Orientation.js";
 import MapFieldContents from "./MapFieldContents.js";
+import ReviverRegistry from "../serialization/ReviverRegistry.js";
 
 
 const SEGMENT_ID = new UniqueID();
@@ -22,6 +23,13 @@ class SnakeSegment extends MapFieldContents {
         this.index = index;
         this.id = "segment" + SEGMENT_ID.getID();
         this.position = new Vector2(0,0);
+    }
+
+    serializationTransfer(serializer) {
+        serializer.transferField(this, "id");
+        serializer.transferField(this.position, "x");
+        serializer.transferField(this.position, "y");
+        serializer.transferField(this, "snake");
     }
 
     get next() {
@@ -135,6 +143,12 @@ class SnakeSegment extends MapFieldContents {
             this.next.place();
         }
     }
+
 }
+
+ReviverRegistry.Register(SnakeSegment, {
+    factory: (params) => { return new SnakeSegment(null, params.index); },
+    params: (seg) => { return { index: seg.index }; }
+});
 
 export default SnakeSegment;

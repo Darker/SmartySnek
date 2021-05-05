@@ -7,7 +7,11 @@
         if (Number.isNaN(mapSize)) {
             return coordinate;
         }
-        return (mapSize + coordinate) % mapSize;
+        coordinate = (mapSize + coordinate) % mapSize;
+        if (coordinate < 0) {
+            coordinate = mapSize + coordinate;
+        }
+        return coordinate;
     }
 }
 

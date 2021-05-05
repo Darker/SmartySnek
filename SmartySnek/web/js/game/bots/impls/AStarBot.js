@@ -2,13 +2,44 @@
 import FieldDebug from "../../debug/FieldDebug.js";
 import Vector2 from "../../math/Vector2.js";
 import Orientation from "../../math/Orientation.js";
+import ReviverRegistry from "../../../serialization/ReviverRegistry.js";
 //import ProfileScope from "../../debug/ProfileScope.js";
 
 /**
  * @typedef {import("../GameStateInfo").default} GameStateInfo
  * @typedef {import("../../MapField").default} MapField
  * @typedef {import("../../GameMap").default} GameMap
+
+ * @typedef {import("../../../serialization/ISerializer").default} ISerializer
  * */
+
+
+class FieldCostParams {
+    constructor() {
+        this.implicitCost = 1;
+        this.foodCost = -20;
+        // Field cost for when the snake is slithering next to it's body from one side
+        this.oneSideSnakeCost = -1;
+        this.bothSidesSnakeCost = 10;
+        // cost if the last step has danger on a side
+        this.endDangerSide = 20;
+        // cost if the last step has danger in front
+        this.endDangerFront = 30;
+        // cost if any direction at the last step contains food
+        this.endFoodCost = -8;
+    }
+
+    /**
+     * Make slight random changes to the params
+     * */
+    randomize() {
+        for (const [key, value] of Object.entries(this)) {
+            if (typeof value == "number") {
+                this[key] = value + (Math.random() - 0.5) * (value / 2);
+            }
+        }
+    }
+}
 
 class AStarPathStep {
     /**
@@ -16,22 +47,35 @@ class AStarPathStep {
      * @param {Vector2} point
      * @param {Vector2|Orientation} prevPoint
      * @param {GameMap} map
+     * @param {FieldCostParams} costParams
      */
-    constructor(point, prevPoint, map) {
+    constructor(point, prevPoint, map, costParams) {
         this.point = point;
-        this.direction = AStarPathStep.convertPrevPoint(point, prevPoint);
+        if(typeof prevPoint == "object" || typeof prevPoint == "number")
+            this.direction = AStarPathStep.convertPrevPoint(point, prevPoint);
+        this.costParams = costParams;
         this.map = map;
+    }
+    /**
+     * 
+     * @param {ISerializer} serializer
+     */
+    serializationTransfer(serializer) {
+        serializer.transferField(this, "point");
+        serializer.transferField(this, "direction");
+        serializer.transferField(this, "map");
     }
     /**
     *
     * @param {Vector2} point
     * @param {Vector2|Orientation} prevPoint
     * @param {GameMap} map
+    * @param {FieldCostParams} costParams
     * @returns {AStarPathStep}
     */
-    static createCached(point, prevPoint, map, cache) {
+    static createCached(point, prevPoint, map, costParams, cache) {
         if (typeof cache != "object" || cache == null) {
-            return new AStarPathStep(point, prevPoint, map);
+            return new AStarPathStep(point, prevPoint, map, costParams);
         }
         else {
             const direction = this.convertPrevPoint(point, prevPoint);
@@ -43,7 +87,7 @@ class AStarPathStep {
             }
 
             if (!cache[point.x][point.y][direction.direction]) {
-                cache[point.x][point.y][direction.direction] = new AStarPathStep(point, direction.direction, map);
+                cache[point.x][point.y][direction.direction] = new AStarPathStep(point, direction.direction, map, costParams);
             }
             return cache[point.x][point.y][direction.direction];
         }
@@ -112,6 +156,13 @@ class AStarPathStep {
         return this._isFood;
     }
 
+    get foodValue() {
+        if (typeof this._foodValue == "undefined") {
+            this._foodValue = this.mapField.foodPoints;
+        }
+        return this._foodValue;
+    }
+
     /**
      *
      * @param {AStarPath} path
@@ -119,11 +170,11 @@ class AStarPathStep {
      */
     getValue(path, isLast = false) {
         if (typeof this._score != "number") {
-            let score = 1;
+            let score = this.costParams.implicitCost;
 
             // current field food
             if (this.isFood) {
-                score -= 20;
+                score += this.costParams.foodCost;
             }
 
             this._score = score;
@@ -131,7 +182,7 @@ class AStarPathStep {
 
         // side bonus for crawling next to another snake line, but only from one side
         if (typeof this._scoreSideBonus != "number") {
-            let score = 1;
+            let score = 0;
             let leftSnake = false;
             let rightSnake = false;
 
@@ -145,15 +196,15 @@ class AStarPathStep {
                     position.move(dir);
                     if (i == 0) {
                         leftSnake = this.map.getField(position).isSnakeSegment;
-                        if (leftSnake) {
-                            this.map.getField(position).addDebug("SNAKE left", [255, 100, 0], null, 4);
-                        }
+                        //if (leftSnake) {
+                        //    this.map.getField(position).addDebug("SNAKE left", [255, 100, 0], null, 4);
+                        //}
                     }
                     if (i == 2) {
                         rightSnake = this.map.getField(position).isSnakeSegment;
-                        if (rightSnake) {
-                            this.map.getField(position).addDebug("SNAKE right", [255, 100, 0], null, 4);
-                        }
+                        //if (rightSnake) {
+                        //    this.map.getField(position).addDebug("SNAKE right", [255, 100, 0], null, 4);
+                        //}
                     }
                     position.position = this.point;
                 }
@@ -162,10 +213,10 @@ class AStarPathStep {
             }
 
             if (leftSnake ^ rightSnake) {
-                score += -1;
+                score += this.costParams.oneSideSnakeCost;
             }
             else if (leftSnake && rightSnake) {
-                score += 10;
+                score += this.costParams.bothSidesSnakeCost;
             }
 
 
@@ -185,16 +236,16 @@ class AStarPathStep {
                 }
 
                 if (dangerous) {
-                    totalScore += 20;
+                    totalScore += this.costParams.endDangerSide;
                     // if this is last step then the front direction MUST NOT HAVE DANGER!!!
                     if (i == 1) {
-                        totalScore += 10000;
+                        totalScore += this.costParams.endDangerFront;
                         //field.addDebug(new FieldDebug("DANGER!", [255, 0, 0], null, 4));
                         break;
                     }
                 }
                 else if (field.isFood) {
-                    totalScore -= 8;
+                    totalScore += this.costParams.endFoodCost;
                 }
                 ++i;
             }
@@ -244,7 +295,7 @@ class AStarPathStep {
         for (let i = 0; i < 3; ++i) {
             position.move(dir);
             //const profileCreateStep = profileNextPosSteps.nest("createStep");
-            const newStep = AStarPathStep.createCached(position.clone(), this.point, this.map, stepCache)
+            const newStep = AStarPathStep.createCached(position.clone(), this.point, this.map, this.costParams, stepCache)
             //profileCreateStep.close();
             //profileNextPosSteps.pushRoot();
             yield newStep;
@@ -261,11 +312,18 @@ class AStarPath {
     /**
      *
      * @param {GameMap} map
+     * @param {FieldCostParams} costParams
      */
-    constructor(map) {
+    constructor(map, costParams) {
         /** @type {AStarPathStep[]} **/
         this.steps = [];
         this.map = map;
+        this.costParams = costParams;
+    }
+    serializationTransfer(serializer) {
+        serializer.transferField(this, "steps");
+        serializer.transferField(this, "map");
+        serializer.transferField(this, "costParams");
     }
     /**
      *
@@ -273,6 +331,11 @@ class AStarPath {
      */
     addStep(step) {
         delete this._value;
+
+        //if (this.containsPoint(step.point)) {
+        //    throw new Error("Point already exists");
+        //}
+
         this.steps.push(step);
     }
     get last() {
@@ -293,7 +356,7 @@ class AStarPath {
      * @param {Vector2} point
      */
     containsPoint(point) {
-        return this.steps.find((x) => x.point.equals(point));
+        return this.steps.find((x) => x.point.equals(point, null, this.map.size)) != null;
     }
 
     get endsWithFood() {
@@ -325,7 +388,7 @@ class AStarPath {
             for (let i = 0, l = otherPath.length; i < l; ++i) {
                 const item = otherPath.steps[i];
                 const myItem = this.steps[i];
-                if (myItem.direction.direction != item.direction.direction || !myItem.point.equals(item.point)) {
+                if (myItem.direction.direction != item.direction.direction || !myItem.point.equals(item.point,null,this.map.size)) {
                     return false;
                 }
             }
@@ -339,11 +402,11 @@ class AStarPath {
      */
     forkInto(point, stepCache = null) {
         // if the point creates circle, do not fork
-        if (point instanceof Vector2 && this.steps.find((x) => x.point.equals(point))) {
+        if (point instanceof Vector2 && this.containsPoint(point)) {
             //console.log("discarding circular fork")
             return null;
         }
-        else if (point instanceof AStarPathStep && this.steps.find((x) => x.point.equals(point.point))) {
+        else if (point instanceof AStarPathStep && this.containsPoint(point.point)) {
             return null;
         }
         else {
@@ -357,7 +420,7 @@ class AStarPath {
 
             const newPath = this.fork();
             if (!(point instanceof AStarPathStep)) {
-                point = AStarPathStep.createCached(point, this.last.point, this.map, stepCache);//new AStarPathStep(point, this.last.point);
+                point = AStarPathStep.createCached(point, this.last.point, this.map, this.costParams, stepCache);//new AStarPathStep(point, this.last.point);
             }
             //else {
             //    const test = new AStarPathStep(point.point, this.last.point);
@@ -377,14 +440,30 @@ class AStarPath {
         }
     }
 
+    get foodCount() {
+        if (typeof this._foodCount == "undefined") {
+            this._foodCount = 0;
+            for (const step of this.steps) {
+                this._foodCount += step.foodValue;
+            }
+        }
+        return this._foodCount;
+    }
+
     drawPath(clear = false) {
         if (clear) {
             this.map.clearAllDebug();
         }
-
+        let i = 0;
         for (const step of this.steps) {
-            const value = step.getValue(this.map, this, step==this.last);
-            this.map.getField(step.point).addDebug(new FieldDebug("step\nvalue=" + value, [0, 255, 0], null, this.steps.length));
+            const stepField = this.map.getField(step.point);
+            let color = [0, 255, 0];
+            if (stepField.isDangerous) {
+                color = [255, 100, 0];
+            }
+            const title = "step#" + i + " " + step.point + " " + step.direction.directionPictogram() + "\nVALUE=" + step.getValue(this, i + 1 == this.length);
+            stepField.addDebug(new FieldDebug(title, color, null, this.length));
+            ++i;
         }
     }
     /**
@@ -395,23 +474,16 @@ class AStarPath {
         return this.last.isSafelyAdjacent(point);
     }
 }
+ReviverRegistry.Register(AStarPath);
+ReviverRegistry.Register(AStarPathStep);
 
-class AStarPathInfo {
-    /**
-     *
-     * @param {AStarPath} path
-     */
-    constructor(path) {
-        this.path = path;
-
-    }
-}
 
 class AStarBot extends SnakeController {
     constructor() {
         super();
         /** @type {AStarPath} **/
         this.path = null;
+        this.costParams = new FieldCostParams();
         this.pathStep = 1;
     }
     get name() { return "A* bot"; }
@@ -432,9 +504,7 @@ class AStarBot extends SnakeController {
             console.log("Total paths found: ", paths.length);
 
             if (paths.length > 0) {
-                for (const step of paths[0].steps) {
-                    gameInfo.map.getField(step.point).addDebug(new FieldDebug("path step", [0, 255, 0], null, paths[0].steps.length));
-                }
+                paths[0].drawPath();
 
                 //this.paths = paths;
                 //this.pathsIndex = 0;
@@ -466,6 +536,8 @@ class AStarBot extends SnakeController {
             }
         }
     }
+
+
     /**
      *
      * @param {Vector2} initPoint
@@ -494,12 +566,12 @@ class AStarBot extends SnakeController {
                 return a.getValue() - b.getValue();
             }
             else {
-                return a.length - b.length;
+                return b.length - a.length;
             }
         }
 
-        const initialPath = new AStarPath(map);
-        initialPath.addStep(new AStarPathStep(initPoint, initDirection, map));
+        const initialPath = new AStarPath(map, this.costParams);
+        initialPath.addStep(new AStarPathStep(initPoint, initDirection, map, this.costParams));
         /** @type {AStarPath[]} **/
         const paths = [initialPath];
 
@@ -554,17 +626,18 @@ class AStarBot extends SnakeController {
 
             // add possible directions
             if (currentPath.length < MAX_PATH_LENGTH && steps < MAX_STEPS) {
-                addToFinished = false;
+                
 
                 //const profileNextPossible = profileMainLoop.nest("nextPossibleSteps");
                 //profileNextPossible.pushRoot();
                 for (const step of currentPath.last.nextPossibleSteps(stepCache)) {
                     let dangerous = false;
-                    if (step.isDangerous()) {
+                    if (step.isDangerous(currentPath)) {
                         dangerous = true;
                         // ignore segments that will move out of the way
                         if (step.mapField.isSnakeSegment) {
-                            if (step.mapField.contents.reverseIndex + 2 < currentPath.length) {
+                            const index = step.mapField.contents.reverseIndex;
+                            if (index + 2 < currentPath.length && index + 2 + currentPath.foodCount < currentPath.length) {
                                 dangerous = false;
                             }
                         }
@@ -575,13 +648,14 @@ class AStarBot extends SnakeController {
                         let path = currentPath.forkInto(step, stepCache);
                         //profileForkInto.close();
                         if (path) {
-                            if (endingOnTime) {
-                                if (path.getValue() >= currentPath.getValue()) {
-                                    addToFinished = true;
-                                    continue;
-                                }
+                            if (endingOnTime && path.getValue() >= currentPath.getValue()) {
+
                             }
-                            paths.unshift(path);
+                            else {
+                                paths.unshift(path);
+                                addToFinished = false;
+                            }
+                            
                         }
                     }
                     //console.log("Fork step: ", step.direction.directionName(), step.point + "");

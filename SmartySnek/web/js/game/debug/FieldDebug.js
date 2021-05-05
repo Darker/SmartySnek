@@ -1,4 +1,5 @@
 ﻿import ColorRGBA from "../generic/ColorRGBA.js";
+import ReviverRegistry from "../../serialization/ReviverRegistry.js";
 
 /**
  * @typedef {import("../generic/ColorRGBA").default} ColorRGBA
@@ -26,6 +27,10 @@ class FieldDebug {
         this.startStepsToLive = life;
         this._stepsToLive = this.startStepsToLive;
     }
+    serializationTransfer(s) {
+        s.transferAll(this);
+    }
+
     get stepsToLive() {
         return this._stepsToLive;
     }
@@ -42,5 +47,7 @@ class FieldDebug {
         return `rgba(${this.outlineColor.r}, ${this.outlineColor.g}, ${this.outlineColor.b}, ${(this._stepsToLive + 1) / this.startStepsToLive})`;
     }
 }
+
+ReviverRegistry.Register(FieldDebug);
 
 export default FieldDebug;

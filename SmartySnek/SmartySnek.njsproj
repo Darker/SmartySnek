@@ -32,6 +32,9 @@
     <Compile Include="server\main.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="server\nodejsGame.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="web\js\game\bots\GameStateInfo.js">
       <SubType>Code</SubType>
     </Compile>
@@ -56,6 +59,9 @@
     <Compile Include="web\js\game\debug\FieldDebug.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="web\js\game\debug\ProfileScope.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="web\js\game\EmptyMapFieldContents.js">
       <SubType>Code</SubType>
     </Compile>
@@ -71,6 +77,9 @@
     </Compile>
     <Compile Include="web\js\game\MapField.js" />
     <Compile Include="web\js\game\MapFieldContents.js" />
+    <Compile Include="web\js\game\math\GameMath.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="web\js\game\math\Orientation.js" />
     <Compile Include="web\js\game\math\Vector2.js" />
     <Compile Include="web\js\game\Snake.js" />
@@ -84,6 +93,24 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="web\js\render\HTMLGameMap.js" />
+    <Compile Include="web\js\serialization\ISerializer.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\serialization\JSONSerializer.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\serialization\ReviverRegistry.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\simpleNeural\NeuralNet.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\simpleNeural\SimpleLayer.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="web\js\simpleNeural\SimpleNeuron.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="web\js\util\UniqueID.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
@@ -105,6 +132,8 @@
     <Folder Include="web\js\game\bots\" />
     <Folder Include="web\js\game\debug\" />
     <Folder Include="web\js\game\generic\" />
+    <Folder Include="web\js\simpleNeural\" />
+    <Folder Include="web\js\serialization\" />
     <Folder Include="web\js\render\" />
     <Folder Include="web\js\util\" />
   </ItemGroup>

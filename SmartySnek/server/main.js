@@ -1,17 +1,18 @@
-﻿var debug = require('debug');
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+﻿import * as debug from "debug";
+import express from "express";
+import * as path from "path";
+import * as favicon from "serve-favicon";
+import logger from "morgan";
+import cookieParser from "cookie-parser";
+import bodyParser from "body-parser";
+import * as http from "http";
 
 const PORT = process.env.PORT || 8080;
 
 var app = express();
-var createServer = require('http').createServer;
+console.log(import.meta.url);
 
-const server = createServer(function (req, res) {
+const server = http.createServer(function (req, res) {
     return app(req, res);
 });
 // view engine setup
@@ -23,7 +24,9 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '../web')));
+const staticDir = path.join(path.dirname(import.meta.url.replace("file:///", "")), '../web');
+console.log("Static content at: ", staticDir);
+app.use(express.static(staticDir));
 
 app.set('port', PORT);
 

@@ -43,10 +43,15 @@ class GameControls {
     }
     set speedMilliseconds(value) {
         this.speedControl.value = Math.log2(value);
+        this.updateSpeed();
+    }
+    get slowestSpeed() {
+        return Math.pow(2, parseFloat(this.speedControl.max));
     }
     get speedStopped() {
         return this.speedControl.valueAsNumber > 11.5;
     }
+
 
     get botOptions() {
         return this._botOptions;

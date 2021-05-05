@@ -1,12 +1,15 @@
 ﻿import EmptyMapFieldContents from "./EmptyMapFieldContents.js";
 import ColorRGBA from "./generic/ColorRGBA.js";
 import FieldDebug from "./debug/FieldDebug.js";
+import ReviverRegistry from "../serialization/ReviverRegistry.js";
+import Vector2 from "./math/Vector2.js";
 
 /**
  * @typedef {import("./MapFieldContents").default} MapFieldContents
  * @typedef {import("./math/Vector2").default} Vector2
  * @typedef {import("./GameMap").default} GameMap
  * @typedef {import("./debug/FieldDebug").default} FieldDebug
+ * @typedef {import("../serialization/ISerializer").default} ISerializer
  * */
 
 class MapField {
@@ -33,7 +36,7 @@ class MapField {
      */
     addDebug(debugInfo, backgroundColor, outlineColor = null, lifetime = 5) {
         if (typeof debugInfo == "string") {
-            debugInfo = new FieldDebug(debugInfo, backgroundColor, outlineColor, lifetime);
+            debugInfo = new FieldDebug(...arguments);
         }
         this._debugContents.push(debugInfo);
     }
@@ -112,6 +115,23 @@ class MapField {
     get contentsID() { return this.isEmpty ? "" : this.contents.uniqueID; }
     get isSnakeSegment() { return this.isEmpty ? false : this.contents.isSnakeSegment; }
     get isDangerous() { return this.isEmpty ? false : this.contents.damage > 0 || this.contents.isDangerous; }
+
+    /**
+     * 
+     * @param {ISerializer} serializer
+     */
+    serializationTransfer(serializer) {
+        serializer.transferField(this, "map");
+        serializer.transferField(this.position, "x");
+        serializer.transferField(this.position, "y");
+        serializer.transferField(this, "contents", false);
+        serializer.transferField(this, "_debugContents", false);
+    }
 }
+
+ReviverRegistry.Register(MapField, {
+    factory: (params) => new MapField(new Vector2(0,0), null),
+    params: () => { }
+})
 
 export default MapField;

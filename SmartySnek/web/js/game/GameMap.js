@@ -1,8 +1,10 @@
 ﻿import MapField from "./MapField.js";
 import Vector2 from "./math/Vector2.js";
+import ReviverRegistry from "../serialization/ReviverRegistry.js";
 
 /**
  * @typedef {import("math/Orientation").default} Orientation
+ * @typedef {import("../serialization/ISerializer").default} ISerializer
  * */
 
 class GameMap {
@@ -15,6 +17,14 @@ class GameMap {
             this.map.push(new MapField(new Vector2(i%size, Math.floor(i/size)), this));
         }
     }
+    /**
+     * 
+     * @param {ISerializer} serializer
+     */
+    serializationTransfer(serializer) {
+        serializer.transferField(this, "map");
+    }
+
     getField(x, y) {
         const position = this.normalizePoint(x, y);
         const offset = position.y * this.size + position.x;
@@ -134,5 +144,12 @@ class GameMap {
         return result;
     }
 }
+
+ReviverRegistry.Register(GameMap, {
+    factory: (params) => new GameMap(params.size),
+    params: (map) => {
+        return { size: map.size };
+    }
+});
 
 export default GameMap;

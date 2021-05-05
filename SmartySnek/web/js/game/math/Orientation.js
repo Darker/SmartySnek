@@ -1,4 +1,5 @@
 ﻿import GameMath from "./GameMath.js";
+import ReviverRegistry from "../../serialization/ReviverRegistry.js";
 
 /**
  * @typedef {import("./Vector2").default} Vector2
@@ -19,6 +20,11 @@ class Orientation {
         * */
         this.direction = dir;
     }
+
+    serializationTransfer(serializer) {
+        serializer.transferField(this, "direction");
+    }
+
     /**
      * Returns orientation if it can be drawn between the two vectors. The orientation draws from vec1 to vec2
      * @param {Vector2} vec1
@@ -167,5 +173,5 @@ class Orientation {
         return this.direction % 2 != 0 ? 2 - this.direction : 0;
     }
 }
-
+ReviverRegistry.Register(Orientation, { factory: () => new Orientation() });
 export default Orientation;

@@ -1,4 +1,5 @@
 ﻿import GameMath from "./GameMath.js";
+import ReviverRegistry from "../../serialization/ReviverRegistry.js";
 
 /**
  * @typedef {import("./Orientation").default} Orientation
@@ -38,6 +39,9 @@ class Vector2 {
         this.overflowEnabled = false;
         this.overflowValue = Infinity;
     }
+
+    serializationTransfer() {}
+
     get x() { return this._position[0]; }
     get y() { return this._position[1]; }
     set x(value) { return this._position[0] = value; }
@@ -162,12 +166,12 @@ class Vector2 {
      * @param {number|Vector2} x
      * @param {number} y
      */
-    equals(x, y) {
+    equals(x, y, overflow = NaN) {
         if (x instanceof Vector2) {
             y = x.y;
             x = x.x;
         }
-        return this.x == x && this.y == y;
+        return GameMath.normalizeCoordOverflow(this.x, overflow) == GameMath.normalizeCoordOverflow(x, overflow) && GameMath.normalizeCoordOverflow(this.y, overflow) == GameMath.normalizeCoordOverflow(y, overflow);
     }
 
     /**
@@ -255,5 +259,9 @@ function spiral(n) {
     return pos;
 }
 
+ReviverRegistry.Register(Vector2, {
+    factory: (params) => new Vector2(params.x, params.y),
+    params: (vec) => { return { x: vec.x, y: vec.y }; }
+})
 
 export default Vector2;

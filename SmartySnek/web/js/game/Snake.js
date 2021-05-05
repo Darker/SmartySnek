@@ -1,8 +1,10 @@
 ﻿import SnakeSegment from "./SnakeSegment.js";
 import Orientation from "./math/Orientation.js";
+import ReviverRegistry from "../serialization/ReviverRegistry.js";
 
 /**
  * @typedef {import("./GameMap").default} GameMap
+ * @typedef {import("../serialization/ISerializer").default} ISerializer
  * */
 
 class Snake {
@@ -12,6 +14,7 @@ class Snake {
      */
     constructor(map) {
         this.map = map;
+        /** @type {SnakeSegment[]} **/
         this.segments = [];
 
 
@@ -28,6 +31,23 @@ class Snake {
 
         this.orientation = new Orientation();
         this.resetSnake();
+    }
+
+    /**
+     * 
+     * @param {ISerializer} serializer
+     */
+    serializationTransfer(serializer) {
+        serializer.transferField(this, "map");
+        serializer.transferField(this, "unusedFood");
+        serializer.transferField(this, "dead");
+        serializer.transferField(this, "orientation");
+        serializer.transferField(this.segments, "length");
+
+        // init segments manually, because they are refferences
+        for (let i = 0, l = this.segments.length; i < l; ++i) {
+            serializer.transferField(this.segments, i);
+        }
     }
     resetSnake() {
         this.segments.length = 0;
@@ -98,5 +118,7 @@ class Snake {
     get head() { return this.segments.length > 0 ? this.segments[0] : null; }
     get tail() { return this.segments.length > 0 ? this.segments[this.segments.length - 1] : null; }
 }
+
+ReviverRegistry.Register(Snake, { factory: () => new Snake() });
 
 export default Snake;

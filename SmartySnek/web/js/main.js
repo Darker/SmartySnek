@@ -11,8 +11,9 @@ import SweepBot from "./game/bots/impls/SweepBot.js";
 import SnakeController from "./game/bots/SnakeController.js";
 import FoodSeeker from "./game/bots/impls/FoodSeeker.js";
 import AStarBot from "./game/bots/impls/AStarBot.js";
+import JSONSerializer from "./serialization/JSONSerializer.js";
 
-const game = new Game();
+let game = new Game();
 window.game = game;
 const renderer = new HTMLGameMap();
 window.renderer = renderer;
@@ -22,6 +23,8 @@ window.snake = game.snake;
 renderer.update();
 
 const controls = new GameControls();
+
+window.JSONSerializer = JSONSerializer;
 
 /** @type {SnakeController[]} **/
 const bots = [new KeyboardController(), new LucaBot(), new TurnRightBot(), new SweepBot(), new FoodSeeker(), new AStarBot()];
@@ -33,6 +36,8 @@ controls.onBotChange = () => { game.controller = controls.selectedBot };
 document.querySelector("body").append(controls.html, renderer.html, renderer.floatingTooltip);
 game.controller = controls.selectedBot;
 
+const snapshots = [];
+
 let lastSleep = performance.now();
 async function gameSleep(delay) {
     if (performance.now() - lastSleep > 1000) {
@@ -42,7 +47,6 @@ async function gameSleep(delay) {
         await new Promise((resolve) => setTimeout(resolve, delay));
         lastSleep = performance.now();
     }
-        
 }
 
 (async () => {
@@ -81,8 +85,24 @@ async function gameSleep(delay) {
             if (stepDelay >= 1)
                 await gameSleep(stepDelay);
             try {
-                if (play)
+                if (play) {
                     game.step();
+                    try {
+                        const ser = new JSONSerializer(false);
+                        snapshots.push(ser.transferField(game));
+                        if (snapshots.length > 20) {
+                            //snapshots.shift();
+                            //console.log("Deletig snapshots: ", 0, snapshots.length - 5);
+                            snapshots.splice(0, snapshots.length - 20);
+                        }
+                    }
+                    catch (e) {
+                        console.error("Cannot serialize game!");
+                        console.trace(e);
+                    }
+                }
+                    
+
             }
             catch (e) {
                 renderer.update();
@@ -93,7 +113,18 @@ async function gameSleep(delay) {
             }
             renderer.update();
             if (game.snake.dead) {
-                break;
+                controls.speedMilliseconds = controls.slowestSpeed;
+                const ser = new JSONSerializer(true);
+                ser.data = snapshots[0];
+                snapshots.push(snapshots[0]);
+                game = ser.transferField();
+                renderer.map = game.map;
+                window.map = game.map;
+                window.snake = game.snake;
+                window.game = game;
+                renderer.update();
+                await gameSleep(1000);
+                //break;
             }
             if (delay >= 2)
                 await gameSleep(delay / 2);
@@ -102,6 +133,15 @@ async function gameSleep(delay) {
     }
 
 })();
+
+window.testSerialization = function() {
+    const ser1 = new JSONSerializer(false);
+    const serialized = ser1.transferField(game);
+    const ser2 = new JSONSerializer(true);
+    ser2.data = serialized;
+    const deserialized = ser2.transferField();
+    return { serialized, deserialized };
+}
 
 //setInterval(() => { snake.orientation.rotateLeft(); }, 4000);
 

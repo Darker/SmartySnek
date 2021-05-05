@@ -1,4 +1,6 @@
-﻿class ColorRGBA {
+﻿import ReviverRegistry from "../../serialization/ReviverRegistry.js";
+
+class ColorRGBA {
     constructor(r, g, b, a) {
         if (typeof r == "object") {
             if (r instanceof ColorRGBA) {
@@ -36,6 +38,12 @@
         } else {
             this.a = 255;
         }
+    }
+    serializationTransfer(s) {
+        s.transferField(this.bands, 0);
+        s.transferField(this.bands, 1);
+        s.transferField(this.bands, 2);
+        s.transferField(this.bands, 3);
     }
     get r() {
         return this.bands[0];
@@ -79,5 +87,7 @@
         return result;
     }
 }
+
+ReviverRegistry.Register(ColorRGBA);
 
 export default ColorRGBA;
